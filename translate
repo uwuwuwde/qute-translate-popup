@@ -15,11 +15,12 @@ def js(message):
         box.style.bottom = '10px';
         box.style.right = '10px';
         box.style.backgroundColor = 'white';
+        box.style.color = 'black';
         box.style.borderRadius = '8px';
         box.style.padding = '10px';
         box.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
         box.style.zIndex = '10000';
-        box.innerText = '{message}';
+        box.innerText = decodeURIComponent("{message}");
         document.body.appendChild(box);
 
         function removeBox(event) {{
@@ -35,7 +36,11 @@ def js(message):
 def translate_google(text, target_lang):
     encoded_text = urllib.parse.quote(text)
     response = requests.get(f"https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl={target_lang}&dt=t&q={encoded_text}")
-    return json.loads(response.text)[0][0][0]
+    response_json = json.loads(response.text)
+    translated_text = ""
+    for i in response_json[0]:
+        translated_text += i[0]
+    return translated_text
 
 def translate_libretranslate(text, url, key, target_lang):
     response = requests.post(f"{url}/translate", data={
@@ -62,7 +67,7 @@ def main():
         sys.exit(1)
 
     if args.url:
-        current_url = os.getenv('QUTE_URL', '')
+        current_url = urllib.parse.quote(os.getenv('QUTE_URL', ''))
         translated_url = f"https://translate.google.com/translate?sl=auto&tl={args.target_lang}&u={urllib.parse.quote(current_url)}"
         with open(qute_fifo, 'a') as fifo:
             fifo.write(f"open -t {translated_url}\n")
@@ -74,8 +79,7 @@ def main():
         elif args.provider == 'libretranslate':
             translated_text = translate_libretranslate(text, args.libretranslate_url, args.libretranslate_key, args.target_lang)
 
-        escaped_translated_text = translated_text.replace("'", "\'")
-        js_code = js(escaped_translated_text).replace('\n', ' ')
+        js_code = js(urllib.parse.quote(translated_text)).replace('\n', ' ')
 
         with open(qute_fifo, 'a') as fifo:
             fifo.write(f"jseval -q {js_code}\n")
