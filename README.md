@@ -1,5 +1,7 @@
 # qute-translate-popup
 
+![Demo](./demo.gif)
+
 [userscript](https://github.com/qutebrowser/qutebrowser/blob/master/doc/userscripts.asciidoc) for [qutebrowser](https://github.com/qutebrowser/qutebrowser) for translation of pages or selected text using [Google translate](https://translate.google.com/)/[LibreTranslate](https://github.com/LibreTranslate/LibreTranslate). Makes a qute popup!
 
 ## Installation
